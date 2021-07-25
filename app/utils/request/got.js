@@ -5,13 +5,17 @@ const debug = require('debug')('utils-mad:request:got');
 const got = require('got');
 const save = require('./save');
 const ua = require('../../const/ua');
+const {default: PQueue} = require('p-queue');
+
+// количество запросов за промежуток времени в мс
+const requestQueue = new PQueue({intervalCap: 10, interval: 1000});
 
 /**
  * @param {string} url
  * @param {object} opts
  * @returns {Promise<object>}
  */
-module.exports = async (url, opts = {}) => {
+module.exports = (url, opts = {}) => requestQueue.add(async () => {
     opts = {...opts};
 
     if (!opts.timeout) {
@@ -42,4 +46,4 @@ module.exports = async (url, opts = {}) => {
         debug(curl(url, opts, err));
         throw err;
     }
-};
+});

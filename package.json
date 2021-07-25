@@ -23,6 +23,7 @@
     "nano-time": "1.0.0",
     "node-routeros": "1.6.9",
     "p-map": "4.0.0",
+    "p-queue": "6.6.2",
     "pretty-bytes": "5.6.0",
     "random-mua": "0.5.0",
     "shrink-string": "3.0.9",
@@ -31,8 +32,8 @@
   },
   "devDependencies": {
     "@k03mad/eslint-config": "8.2.2",
-    "eslint": "7.30.0",
-    "eslint-plugin-jsdoc": "35.4.3",
+    "eslint": "7.31.0",
+    "eslint-plugin-jsdoc": "36.0.2",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "5.1.0",
     "eslint-plugin-sort-requires": "2.1.0",
