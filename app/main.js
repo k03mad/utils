@@ -44,6 +44,9 @@ module.exports = {
         check: require('./api/pinger/check'),
         notify: require('./api/pinger/notify'),
     },
+    syncthing: {
+        get: require('./api/syncthing/get'),
+    },
     tmdb: {
         get: require('./api/tmdb/get'),
     },

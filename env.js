@@ -24,6 +24,11 @@ module.exports = {
     pinger: {
         tg: process.env.TELEGRAM_PINGER_BOT,
     },
+    syncthing: {
+        ip: process.env.SYNCTHING_CLOUD_IP,
+        port: process.env.SYNCTHING_CLOUD_PORT,
+        key: process.env.SYNCTHING_API_KEY,
+    },
     telegram: {
         me: process.env.TELEGRAM_MY_CHAT,
     },
