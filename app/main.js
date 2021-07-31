@@ -83,6 +83,7 @@ module.exports = {
     },
     folder: {
         erase: require('./utils/folder/erase'),
+        size: require('./utils/folder/size'),
     },
     hosts: {
         comment: require('./utils/hosts/comment'),
