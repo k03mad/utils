@@ -12,8 +12,7 @@ module.exports = async path => {
 
     [...du.matchAll(/(\d+)\s+([\w/-]+)/g)]
         .forEach(([, count, folder]) => {
-            const folderName = folder.split('/').pop();
-            sizes[folderName] = Number(count);
+            sizes[folder] = Number(count);
         });
 
     return sizes;
