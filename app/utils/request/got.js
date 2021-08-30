@@ -8,7 +8,7 @@ const ua = require('../../const/ua');
 const {default: PQueue} = require('p-queue');
 
 // количество запросов за промежуток времени в мс
-const requestQueue = new PQueue({intervalCap: 5, interval: 1000});
+const requestQueue = new PQueue({intervalCap: 10, interval: 1000});
 
 /**
  * @param {string} url
