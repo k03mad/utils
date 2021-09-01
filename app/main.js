@@ -22,6 +22,9 @@ module.exports = {
         isLocal: require('./api/ip/isLocal'),
         lookup: require('./api/ip/lookup'),
     },
+    lastfm: {
+        get: require('./api/lastfm/get'),
+    },
     mikrotik: {
         switch: require('./api/mikrotik/switch'),
         write: require('./api/mikrotik/write'),

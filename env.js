@@ -10,6 +10,9 @@ module.exports = {
         db: process.env.INFLUX_DB,
         request: process.env.INFLUX_STORE_REQUEST_STATS,
     },
+    lastfm: {
+        key: process.env.LASTFM_KEY,
+    },
     mikrotik: {
         host: process.env.MIKROTIK_HOST,
         user: process.env.MIKROTIK_USER,
