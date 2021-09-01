@@ -38,7 +38,7 @@
     "eslint-plugin-promise": "5.1.0",
     "eslint-plugin-sort-requires": "2.1.0",
     "eslint-plugin-unicorn": "34.0.1",
-    "husky": "7.0.1"
+    "husky": "7.0.2"
   },
   "scripts": {
     "lint": "eslint ./ --report-unused-disable-directives --format=codeframe --ignore-pattern='!.*'",
