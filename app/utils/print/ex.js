@@ -46,16 +46,22 @@ module.exports = (err, {
         msg.push(err.toString());
     }
 
-    if (err.options && err.options.url) {
-        if (err.response && err.response.statusCode) {
-            msg.push(`${red(err.response.statusCode)}:`);
-        }
+    let httpErr = '';
 
-        if (err.options.method) {
-            msg.push(green(err.options.method));
-        }
+    if (err.response?.statusCode) {
+        httpErr += `${red(err.response.statusCode)}:`;
+    }
 
-        msg.push(blue(err.options.url));
+    if (err.options?.method) {
+        httpErr += ` ${green(err.options.method)}`;
+    }
+
+    if (err.options?.url) {
+        httpErr += ` ${blue(err.options.url)}`;
+    }
+
+    if (httpErr) {
+        msg.push(httpErr);
     }
 
     if (after) {
