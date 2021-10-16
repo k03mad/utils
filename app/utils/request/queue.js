@@ -6,7 +6,7 @@ const {default: PQueue} = require('p-queue');
 const requestQueue = {
     'default': 10,
 
-    'localhost:7006': 30,
+    'localhost:7006': 100,
 };
 
 const getQueueRpsOptions = rps => ({intervalCap: rps, interval: 1000});
