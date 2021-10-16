@@ -1,12 +1,15 @@
 'use strict';
 
 const debug = require('debug')('utils-mad:request:queue');
+const env = require('../../../env');
 const {default: PQueue} = require('p-queue');
 
-const requestQueue = {
-    'default': 10,
+const influx = env.influx.url.replace('http://', '');
 
-    'localhost:7006': 100,
+const requestQueue = {
+    default: 10,
+
+    [influx]: 100,
 };
 
 const getQueueRpsOptions = rps => ({intervalCap: rps, interval: 1000});
