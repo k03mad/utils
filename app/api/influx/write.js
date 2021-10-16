@@ -5,14 +5,12 @@ const delay = require('../../utils/promise/delay');
 const escape = require('../../utils/string/escape');
 const got = require('../../utils/request/got');
 const now = require('nano-time');
-// const pMap = require('p-map');
 const {influx} = require('../../../env');
 
 /**
  * @param {object} data
  */
 module.exports = async data => {
-    // const concurrency = 30;
     const tries = {
         count: 3,
         delay: 10_000,

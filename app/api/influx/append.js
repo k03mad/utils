@@ -1,7 +1,6 @@
 'use strict';
 
 const convert = require('../../utils/array/convert');
-// const pMap = require('p-map');
 const query = require('./query');
 const write = require('./write');
 
@@ -9,8 +8,6 @@ const write = require('./write');
  * @param {object} append
  */
 module.exports = async append => {
-    // const concurrency = 5;
-
     const prepared = [];
 
     for (const data of convert(append)) {
