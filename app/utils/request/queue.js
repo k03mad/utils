@@ -7,8 +7,9 @@ const {default: PQueue} = require('p-queue');
 const influx = env.influx.url.replace('http://', '');
 
 const requestQueue = {
-    default: 10,
+    'default': 10,
 
+    'api.themoviedb.org': 50,
     [influx]: 100,
 };
 
