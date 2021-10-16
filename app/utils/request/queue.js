@@ -18,7 +18,7 @@ const setLogOnActiveEvent = name => {
         const {size, pending, _intervalCap} = requestQueue[name];
 
         if (size > 0) {
-            debug(`${name}: ${_intervalCap} rps max | wait for run: ${size} | running: ${pending}`);
+            debug(`[${name}] ${_intervalCap} rps max | wait for run: ${size} | running: ${pending}`);
         }
     });
 };

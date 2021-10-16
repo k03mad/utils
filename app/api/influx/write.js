@@ -5,14 +5,12 @@ const delay = require('../../utils/promise/delay');
 const escape = require('../../utils/string/escape');
 const got = require('../../utils/request/got');
 const now = require('nano-time');
-const pMap = require('p-map');
 const {influx} = require('../../../env');
 
 /**
  * @param {object} data
  */
 module.exports = async data => {
-    const concurrency = 5;
     const tries = {
         count: 3,
         delay: 10_000,
@@ -20,7 +18,7 @@ module.exports = async data => {
 
     const errors = [];
 
-    await pMap(convert(data), async ({url = influx.url, db = influx.db, meas, values, timestamp = now()}) => {
+    await Promise.all(convert(data).map(async ({url = influx.url, db = influx.db, meas, values, timestamp = now()}) => {
         try {
             const writeData = Object.entries(values).map(elem => {
                 const [key, prop] = elem;
@@ -50,7 +48,7 @@ module.exports = async data => {
         } catch (err) {
             errors.push(err);
         }
-    }, {concurrency});
+    }));
 
     if (errors.length > 0) {
         throw errors.join('\n\n');
