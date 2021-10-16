@@ -9,27 +9,36 @@ const exec = util.promisify(cp.exec);
 
 /**
  * @param {string|Array<string>} cmd
+ * @param {object} opts
+ * @param {boolean} opts.returnOnErr
  * @returns {string}
  */
-module.exports = async cmd => {
+module.exports = async (cmd, {returnOnErr} = {}) => {
     const maxBuffer = 1024 * 5000;
 
     const run = convert(cmd).join(' && ');
     debug('%o', run);
 
+    let stderr, stdout;
+
     try {
-        const {stdout, stderr} = await exec(run, {maxBuffer, shell: '/bin/bash'});
-        return [stdout, stderr]
-            .filter(Boolean)
-            .map(elem => elem.trim())
-            .join('\n\n');
+        ({stdout, stderr} = await exec(run, {maxBuffer, shell: '/bin/bash'}));
     } catch (err) {
-        throw new Error([
-            'Error while trying to execute:',
-            `$ ${run}`,
-            `# code: ${err?.code}`,
-            `# stdout: ${err?.stdout}`,
-            `# stderr: ${err?.stderr}`,
-        ].join('\n'));
+        if (returnOnErr) {
+            ({stdout, stderr} = err);
+        } else {
+            throw new Error([
+                'Error while trying to execute:',
+                `$ ${run}`,
+                `# code: ${err?.code}`,
+                `# stdout: ${err?.stdout}`,
+                `# stderr: ${err?.stderr}`,
+            ].join('\n'));
+        }
     }
+
+    return [stdout, stderr]
+        .filter(Boolean)
+        .map(elem => elem.trim())
+        .join('\n\n');
 };
