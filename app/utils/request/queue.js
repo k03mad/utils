@@ -4,9 +4,7 @@ const debug = require('debug')('utils-mad:request:queue');
 const {default: PQueue} = require('p-queue');
 
 const requestQueue = {
-    'default': 10,
-
-    'api.nextdns.io': 5,
+    default: 10,
 };
 
 const getQueueRpsOptions = rps => ({intervalCap: rps, interval: 1000});
