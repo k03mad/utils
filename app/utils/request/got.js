@@ -5,45 +5,46 @@ const debug = require('debug')('utils-mad:request:got');
 const got = require('got');
 const save = require('./save');
 const ua = require('../../const/ua');
-const {default: PQueue} = require('p-queue');
-
-// количество запросов за промежуток времени в мс
-const requestQueue = new PQueue({intervalCap: 10, interval: 1000});
+const {getQueue} = require('./queue');
 
 /**
  * @param {string} url
  * @param {object} opts
  * @returns {Promise<object>}
  */
-module.exports = (url, opts = {}) => requestQueue.add(async () => {
-    opts = {...opts};
+module.exports = (url, opts = {}) => {
+    const queue = getQueue(new URL(url).host);
 
-    if (!opts.timeout) {
-        opts.timeout = 15_000;
-    }
+    return queue.add(async () => {
+        opts = {...opts};
 
-    if (!opts.headers) {
-        opts.headers = {'user-agent': ua.tools.curl};
-    } else if (!opts.headers['user-agent']) {
-        opts.headers['user-agent'] = ua.tools.curl;
-    }
-
-    try {
-        const response = await got(url, opts);
-        await save(response);
-
-        if (!opts.responseType) {
-            try {
-                response.body = JSON.parse(response.body);
-            } catch {}
+        if (!opts.timeout) {
+            opts.timeout = 15_000;
         }
 
-        debug(curl(url, opts, response));
-        return response;
-    } catch (err) {
-        await save(err);
+        if (!opts.headers) {
+            opts.headers = {'user-agent': ua.tools.curl};
+        } else if (!opts.headers['user-agent']) {
+            opts.headers['user-agent'] = ua.tools.curl;
+        }
 
-        debug(curl(url, opts, err));
-        throw err;
-    }
-});
+        try {
+            const response = await got(url, opts);
+            await save(response);
+
+            if (!opts.responseType) {
+                try {
+                    response.body = JSON.parse(response.body);
+                } catch {}
+            }
+
+            debug(curl(url, opts, response));
+            return response;
+        } catch (err) {
+            await save(err);
+
+            debug(curl(url, opts, err));
+            throw err;
+        }
+    });
+};
