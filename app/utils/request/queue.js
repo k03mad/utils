@@ -4,7 +4,9 @@ const debug = require('debug')('utils-mad:request:queue');
 const {default: PQueue} = require('p-queue');
 
 const requestQueue = {
-    default: 10,
+    'default': 10,
+
+    'localhost:7006': 30,
 };
 
 const getQueueRpsOptions = rps => ({intervalCap: rps, interval: 1000});
