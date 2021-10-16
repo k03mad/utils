@@ -9,6 +9,7 @@ const influx = env.influx.url.replace('http://', '');
 const requestQueue = {
     'default': 10,
 
+    'rutor.info': 30,
     'api.themoviedb.org': 50,
     [influx]: 100,
 };
