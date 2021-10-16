@@ -12,7 +12,7 @@ const {influx} = require('../../../env');
  * @param {object} data
  */
 module.exports = async data => {
-    const concurrency = 10;
+    const concurrency = 30;
     const tries = {
         count: 3,
         delay: 10_000,
