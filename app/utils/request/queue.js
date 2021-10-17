@@ -22,7 +22,10 @@ const setLogOnActiveEvent = name => {
         const {size, pending, _interval, _intervalCap, _concurrency} = requestQueue[name];
 
         if (size > 0) {
-            const opts = _concurrency ? `${_concurrency} req concurrent` : `${_intervalCap} req per ${_interval}`;
+            const opts = _concurrency === Number.POSITIVE_INFINITY
+                ? `${_intervalCap} req per ${_interval}`
+                : `${_concurrency} req concurrent`;
+
             debug(`[${name}] ${opts} | wait for run: ${size} | running: ${pending}`);
         }
     });
