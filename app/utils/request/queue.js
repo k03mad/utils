@@ -19,7 +19,7 @@ const requestQueue = {
  * @param {string} name
  */
 const setLogOnActiveEvent = name => {
-    requestQueue[name].on('active', () => {
+    requestQueue[name].on('completed', () => {
         const {size, pending, _interval, _intervalCap, _concurrency} = requestQueue[name];
 
         if (size > 0) {
@@ -40,11 +40,11 @@ const setLogOnActiveEvent = name => {
 const getQueue = name => {
     if (!requestQueue[name]) {
         requestQueue[name] = new PQueue(requestQueue.default);
-        setLogOnActiveEvent(requestQueue[name]);
+        setLogOnActiveEvent(name);
     // eslint-disable-next-line no-underscore-dangle
     } else if (!requestQueue[name]._events) {
         requestQueue[name] = new PQueue(requestQueue[name]);
-        setLogOnActiveEvent(requestQueue[name]);
+        setLogOnActiveEvent(name);
     }
 
     return requestQueue[name];
