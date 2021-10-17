@@ -23,7 +23,6 @@ module.exports = (url, gotOpts = {}, {expire = '7d'} = {}) => {
     const queue = getQueue('cache');
 
     return queue.add(async () => {
-
         const cacheGotResponseKeys = [
             'body',
             'headers',

@@ -40,11 +40,11 @@ const setLogOnActiveEvent = name => {
 const getQueue = name => {
     if (!requestQueue[name]) {
         requestQueue[name] = new PQueue(requestQueue.default);
-        setLogOnActiveEvent(name);
+        setLogOnActiveEvent(requestQueue[name]);
     // eslint-disable-next-line no-underscore-dangle
     } else if (!requestQueue[name]._events) {
         requestQueue[name] = new PQueue(requestQueue[name]);
-        setLogOnActiveEvent(name);
+        setLogOnActiveEvent(requestQueue[name]);
     }
 
     return requestQueue[name];
