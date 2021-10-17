@@ -11,6 +11,10 @@ const requestQueue = {
         '*': {concurrency: 5},
     },
 
+    'api.themoviedb.org': {
+        '*': {concurrency: 10},
+    },
+
     'api.nextdns.io': {
         PATCH: {intervalCap: 1, interval: 1000},
         DELETE: {intervalCap: 1, interval: 1000},
@@ -39,7 +43,7 @@ const getLoggedQueue = (host, method) => {
 
         debug(
             `[${method === '*' ? '' : `${method}: `}${host}]`
-            + `${opts} | queue: ${size} | running: ${pending}`,
+            + ` ${opts} | queue: ${size} | running: ${pending}`,
         );
     });
 
