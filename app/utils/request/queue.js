@@ -22,20 +22,28 @@ const requestQueue = {
 };
 
 /**
- * Поставить логирование на простой очереди
+ * Поставить логирование и вернуть очередь
  * @param {string} host
  * @param {string} method
+ * @returns {object}
  */
-const setLogOnActiveEvent = (host, method) => {
-    requestQueue[host][method].on('active', () => {
-        const {size, pending, _interval, _intervalCap, _concurrency} = requestQueue[host][method];
+const getLoggedQueue = (host, method) => {
+    const queue = requestQueue[host][method];
+
+    queue.on('active', () => {
+        const {size, pending, _interval, _intervalCap, _concurrency} = queue;
 
         const opts = _interval > 0
             ? `${_intervalCap} rp ${_interval} ms`
             : `${_concurrency} concurrent`;
 
-        debug(`[${method}: ${host}] ${opts} | queue: ${size} | running: ${pending}`);
+        debug(
+            `[${method === '*' ? '' : `${method}: `}${host}]`
+            + `${opts} | queue: ${size} | running: ${pending}`,
+        );
     });
+
+    return queue;
 };
 
 /**
@@ -45,41 +53,35 @@ const setLogOnActiveEvent = (host, method) => {
  * @returns {object}
  */
 const getQueue = (host, method = 'GET') => {
-    // если нет очереди по хосту
-    if (!requestQueue[host]) {
-        // инициализируем очередь дефолтными значениями
-        if (requestQueue['*'][method]) {
-            // если для метода есть дефолтные, то используем их
-            requestQueue[host] = {[method]: new PQueue(requestQueue['*'][method])};
-            setLogOnActiveEvent(host, method);
-        } else {
-            // иначе дефолтные для любых методов
-            requestQueue[host] = {'*': new PQueue(requestQueue['*']['*'])};
-            setLogOnActiveEvent(host, '*');
+    // проверка на предустановленные настройки очереди для хоста и метода
+    for (const elem of [method, '*']) {
+        // очередь уже проинициализирована
+        if (requestQueue[host]?.[elem]?._events) {
+            return requestQueue[host][elem];
         }
 
-    // если есть очередь по хосту и методу
-    } else if (requestQueue[host][method]) {
-        // если очередь не инициализирована
-        if (!requestQueue[host][method]._events) {
-            // инициализируем
-            requestQueue[host][method] = new PQueue(requestQueue[host][method]);
-            setLogOnActiveEvent(host, method);
+        // очередь нужно проинициализировать
+        if (requestQueue[host]?.[elem]) {
+            requestQueue[host][elem] = new PQueue(requestQueue[host][elem]);
+            return getLoggedQueue(host, elem);
         }
-
-    // если нет очереди по хосту и любому методу
-    } else if (!requestQueue[host]['*']) {
-        // инициализируем очередь дефолтным значением для всех методов
-        requestQueue[host]['*'] = new PQueue(requestQueue['*']['*']);
-        setLogOnActiveEvent(host, '*');
-
-    // если есть очередь по хосту и любому методу, но она ещё не проинициализирована
-    } else if (!requestQueue[host]['*']._events) {
-        requestQueue[host]['*'] = new PQueue(requestQueue[host]['*']);
-        setLogOnActiveEvent(host, '*');
     }
 
-    return requestQueue[host][method] || requestQueue[host]['*'];
+    // инициализация очереди для хоста без текущего метода в предустановках
+    if (requestQueue[host]) {
+        requestQueue[host]['*'] = new PQueue(requestQueue['*']['*']);
+        return getLoggedQueue(host, '*');
+    }
+
+    // инициализация очереди для хоста с методом из предустановок для всех очередей
+    if (requestQueue['*'][method]) {
+        requestQueue[host] = {[method]: new PQueue(requestQueue['*'][method])};
+        return getLoggedQueue(host, method);
+    }
+
+    // нет ни хоста не метода в предустановках
+    requestQueue[host] = {'*': new PQueue(requestQueue['*']['*'])};
+    return getLoggedQueue(host, '*');
 };
 
 module.exports = {getQueue};
