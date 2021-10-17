@@ -20,7 +20,7 @@ const {promises: fs} = require('fs');
  * @returns {Promise<object>}
  */
 module.exports = (url, gotOpts = {}, {expire = '7d'} = {}) => {
-    const queue = getQueue(new URL(url).host);
+    const queue = getQueue('cache');
 
     return queue.add(async () => {
         const cacheGotResponseKeys = [
@@ -75,7 +75,7 @@ module.exports = (url, gotOpts = {}, {expire = '7d'} = {}) => {
             }
         }
 
-        const res = await got(url, gotOpts, {skipQueue: true});
+        const res = await got(url, gotOpts);
 
         const cachedResponse = {};
         cacheGotResponseKeys.forEach(key => {
