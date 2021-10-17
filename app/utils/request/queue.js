@@ -9,27 +9,34 @@ const {default: PQueue} = require('p-queue');
 const influx = env.influx.url.replace('http://', '');
 
 const requestQueue = {
-    'default': {concurrency: 5},
+    '*': {
+        '*': {concurrency: 5},
+    },
 
-    'PATCH :: api.nextdns.io': {intervalCap: 1, interval: 1000},
-    'DELETE :: api.nextdns.io': {intervalCap: 1, interval: 1000},
+    'api.nextdns.io': {
+        PATCH: {intervalCap: 1, interval: 1000},
+        DELETE: {intervalCap: 1, interval: 1000},
+    },
 
-    [influx]: {concurrency: 50},
+    [influx]: {
+        '*': {concurrency: 50},
+    },
 };
 
 /**
  * Поставить логирование на простой очереди
  * @param {string} name
+ * @param {string} method
  */
-const setLogOnActiveEvent = name => {
-    requestQueue[name].on('active', () => {
-        const {size, pending, _interval, _intervalCap, _concurrency} = requestQueue[name];
+const setLogOnActiveEvent = (name, method) => {
+    requestQueue[name][method].on('active', () => {
+        const {size, pending, _interval, _intervalCap, _concurrency} = requestQueue[name][method];
 
-        const opts = _concurrency === Number.POSITIVE_INFINITY
+        const opts = _interval > 0
             ? `${_intervalCap} rp ${_interval} ms`
             : `${_concurrency} concurrent`;
 
-        debug(`[${name}] ${opts} | wait for run: ${size} | running: ${pending}`);
+        debug(`[${method}: ${name}] ${opts} | queue: ${size} | running: ${pending}`);
     });
 };
 
@@ -40,22 +47,26 @@ const setLogOnActiveEvent = name => {
  * @returns {object}
  */
 const getQueue = (name, method = 'GET') => {
-    const keyWithMethod = `${method} :: ${name}`;
+    if (!requestQueue[name]) {
+        requestQueue[name] = {'*': new PQueue(requestQueue['*']['*'])};
+        setLogOnActiveEvent(name, '*');
 
-    if (!requestQueue[name] && !requestQueue[keyWithMethod]) {
-        requestQueue[name] = new PQueue(requestQueue.default);
-        setLogOnActiveEvent(name);
+    } else if (requestQueue[name][method]) {
+        if (!requestQueue[name][method]._events) {
+            requestQueue[name][method] = new PQueue(requestQueue[name][method]);
+            setLogOnActiveEvent(name, method);
+        }
 
-    } else if (requestQueue[keyWithMethod] && !requestQueue[keyWithMethod]._events) {
-        requestQueue[keyWithMethod] = new PQueue(requestQueue[keyWithMethod]);
-        setLogOnActiveEvent(keyWithMethod);
+    } else if (!requestQueue[name]['*']) {
+        requestQueue[name]['*'] = new PQueue(requestQueue['*']['*']);
+        setLogOnActiveEvent(name, '*');
 
-    } else if (requestQueue[name] && !requestQueue[name]._events) {
-        requestQueue[name] = new PQueue(requestQueue[name]);
-        setLogOnActiveEvent(name);
+    } else if (requestQueue[name]['*'] && !requestQueue[name]['*']._events) {
+        requestQueue[name]['*'] = new PQueue(requestQueue[name]['*']);
+        setLogOnActiveEvent(name, '*');
     }
 
-    return requestQueue[keyWithMethod] || requestQueue[name];
+    return requestQueue[name][method] || requestQueue[name]['*'];
 };
 
 module.exports = {getQueue};
