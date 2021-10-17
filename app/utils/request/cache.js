@@ -9,6 +9,7 @@ const os = require('os');
 const path = require('path');
 const {blue, green, yellow, red, dim, cyan} = require('chalk');
 const {compress, decompress} = require('shrink-string');
+const {getQueue} = require('./queue');
 const {promises: fs} = require('fs');
 
 /**
@@ -18,69 +19,74 @@ const {promises: fs} = require('fs');
  * @param {string} opts.expire
  * @returns {Promise<object>}
  */
-module.exports = async (url, gotOpts = {}, {expire = '7d'} = {}) => {
-    const cacheGotResponseKeys = [
-        'body',
-        'headers',
-        'method',
-        'statusCode',
-        'statusMessage',
-        'timings',
-    ];
+module.exports = (url, gotOpts = {}, {expire = '7d'} = {}) => {
+    const queue = getQueue('cache');
 
-    const cacheFile = path.join(
-        os.tmpdir(),
-        hasha('').slice(0, 10),
-        hasha(process.env.npm_package_name || ''),
-        hasha(url),
-        hasha(JSON.stringify(gotOpts)),
-    );
+    return queue.add(async () => {
 
-    await fs.mkdir(path.dirname(cacheFile), {recursive: true});
+        const cacheGotResponseKeys = [
+            'body',
+            'headers',
+            'method',
+            'statusCode',
+            'statusMessage',
+            'timings',
+        ];
 
-    try {
-        const cache = await fs.readFile(cacheFile, {encoding: 'utf-8'});
-        const text = await decompress(cache);
-        const {date, cachedResponse} = JSON.parse(text);
+        const cacheFile = path.join(
+            os.tmpdir(),
+            hasha('').slice(0, 10),
+            hasha(process.env.npm_package_name || ''),
+            hasha(url),
+            hasha(JSON.stringify(gotOpts)),
+        );
 
-        const match = {
-            w: 'weeks',
-            d: 'days',
-            h: 'hours',
-            m: 'minutes',
-            s: 'seconds',
-        };
+        await fs.mkdir(path.dirname(cacheFile), {recursive: true});
 
-        const count = Number(expire.replace(/\D/, ''));
-        const char = expire.replace(/\d/g, '');
-        const measurement = match[char];
+        try {
+            const cache = await fs.readFile(cacheFile, {encoding: 'utf-8'});
+            const text = await decompress(cache);
+            const {date, cachedResponse} = JSON.parse(text);
 
-        const currentDiff = diffDate({date, period: measurement});
+            const match = {
+                w: 'weeks',
+                d: 'days',
+                h: 'hours',
+                m: 'minutes',
+                s: 'seconds',
+            };
 
-        if (currentDiff < count) {
-            debug(`${green('OK')} :: ${currentDiff}/${count} ${measurement} left :: ${blue(url)}\n${blue(dim(cacheFile))}`);
-            return cachedResponse;
+            const count = Number(expire.replace(/\D/, ''));
+            const char = expire.replace(/\d/g, '');
+            const measurement = match[char];
+
+            const currentDiff = diffDate({date, period: measurement});
+
+            if (currentDiff < count) {
+                debug(`${green('OK')} :: ${currentDiff}/${count} ${measurement} left :: ${blue(url)}\n${blue(dim(cacheFile))}`);
+                return cachedResponse;
+            }
+
+            debug(`${red('EXPIRED')} :: ${currentDiff}/${count} ${measurement} left :: ${blue(url)}\n${blue(dim(cacheFile))}`);
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                debug(`${yellow('NOT FOUND')} :: ${blue(url)}`);
+            } else {
+                debug(`${red('ERROR')} :: ${dim(err)} :: ${blue(url)}\n${blue(dim(cacheFile))}`);
+            }
         }
 
-        debug(`${red('EXPIRED')} :: ${currentDiff}/${count} ${measurement} left :: ${blue(url)}\n${blue(dim(cacheFile))}`);
-    } catch (err) {
-        if (err.code === 'ENOENT') {
-            debug(`${yellow('NOT FOUND')} :: ${blue(url)}`);
-        } else {
-            debug(`${red('ERROR')} :: ${dim(err)} :: ${blue(url)}\n${blue(dim(cacheFile))}`);
-        }
-    }
+        const res = await got(url, gotOpts);
 
-    const res = await got(url, gotOpts);
+        const cachedResponse = {};
+        cacheGotResponseKeys.forEach(key => {
+            cachedResponse[key] = res[key];
+        });
 
-    const cachedResponse = {};
-    cacheGotResponseKeys.forEach(key => {
-        cachedResponse[key] = res[key];
+        const compressed = await compress(JSON.stringify({date: moment(), cachedResponse}));
+        await fs.writeFile(cacheFile, compressed);
+        debug(`${cyan('SAVED')} :: ${blue(dim(cacheFile))}`);
+
+        return res;
     });
-
-    const compressed = await compress(JSON.stringify({date: moment(), cachedResponse}));
-    await fs.writeFile(cacheFile, compressed);
-    debug(`${cyan('SAVED')} :: ${blue(dim(cacheFile))}`);
-
-    return res;
 };
