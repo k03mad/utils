@@ -7,14 +7,11 @@ const {default: PQueue} = require('p-queue');
 const influx = env.influx.url.replace('http://', '');
 
 const requestQueue = {
-    'default': 10,
+    'default': {concurrency: 5},
 
-    'rutor.info': 1,
-    'api.themoviedb.org': 50,
-    [influx]: 100,
+    'api.themoviedb.org': {intervalCap: 10, interval: 1000},
+    [influx]: {concurrency: 50},
 };
-
-const getQueueRpsOptions = rps => ({intervalCap: rps, interval: 1000});
 
 /**
  * Поставить логирование на простой очереди
@@ -22,10 +19,11 @@ const getQueueRpsOptions = rps => ({intervalCap: rps, interval: 1000});
  */
 const setLogOnActiveEvent = name => {
     requestQueue[name].on('active', () => {
-        const {size, pending, _intervalCap} = requestQueue[name];
+        const {size, pending, _interval, _intervalCap, _concurrency} = requestQueue[name];
 
         if (size > 0) {
-            debug(`[${name}] ${_intervalCap} rps | wait for run: ${size} | running: ${pending}`);
+            const opts = _concurrency ? `${_concurrency} req concurrent` : `${_intervalCap} req per ${_interval}`;
+            debug(`[${name}] ${opts} | wait for run: ${size} | running: ${pending}`);
         }
     });
 };
@@ -36,13 +34,14 @@ const setLogOnActiveEvent = name => {
  * @returns {object}
  */
 const getQueue = name => {
-    if (typeof requestQueue[name] === 'number') {
-        requestQueue[name] = new PQueue(getQueueRpsOptions(requestQueue[name]));
+    if (!requestQueue[name]) {
+        requestQueue[name] = new PQueue(requestQueue.default);
         setLogOnActiveEvent(name);
     }
 
-    if (!requestQueue[name]) {
-        requestQueue[name] = new PQueue(getQueueRpsOptions(requestQueue.default));
+    // eslint-disable-next-line no-underscore-dangle
+    if (!requestQueue[name]._events) {
+        requestQueue[name] = new PQueue(requestQueue[name]);
         setLogOnActiveEvent(name);
     }
 
