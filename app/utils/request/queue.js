@@ -1,18 +1,19 @@
 'use strict';
 
+/* eslint-disable no-underscore-dangle */
+
 const debug = require('debug')('utils-mad:request:queue');
 const env = require('../../../env');
 const {default: PQueue} = require('p-queue');
 
 const influx = env.influx.url.replace('http://', '');
 
-const defaultConcurrency = {concurrency: 5};
-
 const requestQueue = {
-    'default': defaultConcurrency,
-    'cache': defaultConcurrency,
+    'default': {concurrency: 5},
 
-    'api.nextdns.io': {intervalCap: 1, interval: 1000},
+    'PATCH :: api.nextdns.io': {intervalCap: 1, interval: 1000},
+    'DELETE :: api.nextdns.io': {intervalCap: 1, interval: 1000},
+
     [influx]: {concurrency: 50},
 };
 
@@ -35,19 +36,26 @@ const setLogOnActiveEvent = name => {
 /**
  * Получить очередь по названию
  * @param {string} name
+ * @param {string} method
  * @returns {object}
  */
-const getQueue = name => {
-    if (!requestQueue[name]) {
+const getQueue = (name, method = 'GET') => {
+    const keyWithMethod = `${method} :: ${name}`;
+
+    if (!requestQueue[name] && !requestQueue[keyWithMethod]) {
         requestQueue[name] = new PQueue(requestQueue.default);
         setLogOnActiveEvent(name);
-    // eslint-disable-next-line no-underscore-dangle
-    } else if (!requestQueue[name]._events) {
+
+    } else if (requestQueue[keyWithMethod] && !requestQueue[keyWithMethod]._events) {
+        requestQueue[keyWithMethod] = new PQueue(requestQueue[keyWithMethod]);
+        setLogOnActiveEvent(keyWithMethod);
+
+    } else if (requestQueue[name] && !requestQueue[name]._events) {
         requestQueue[name] = new PQueue(requestQueue[name]);
         setLogOnActiveEvent(name);
     }
 
-    return requestQueue[name];
+    return requestQueue[keyWithMethod] || requestQueue[name];
 };
 
 module.exports = {getQueue};

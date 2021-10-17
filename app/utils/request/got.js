@@ -12,39 +12,51 @@ const {getQueue} = require('./queue');
  * @param {object} opts
  * @returns {Promise<object>}
  */
-module.exports = (url, opts = {}) => {
-    const queue = getQueue(new URL(url).host);
+const request = async (url, opts) => {
+    opts = {...opts};
 
-    return queue.add(async () => {
-        opts = {...opts};
+    if (!opts.timeout) {
+        opts.timeout = 15_000;
+    }
 
-        if (!opts.timeout) {
-            opts.timeout = 15_000;
+    if (!opts.headers) {
+        opts.headers = {'user-agent': ua.tools.curl};
+    } else if (!opts.headers['user-agent']) {
+        opts.headers['user-agent'] = ua.tools.curl;
+    }
+
+    try {
+        const response = await got(url, opts);
+        await save(response);
+
+        if (!opts.responseType) {
+            try {
+                response.body = JSON.parse(response.body);
+            } catch {}
         }
 
-        if (!opts.headers) {
-            opts.headers = {'user-agent': ua.tools.curl};
-        } else if (!opts.headers['user-agent']) {
-            opts.headers['user-agent'] = ua.tools.curl;
-        }
+        debug(curl(url, opts, response));
+        return response;
+    } catch (err) {
+        await save(err);
 
-        try {
-            const response = await got(url, opts);
-            await save(response);
+        debug(curl(url, opts, err));
+        throw err;
+    }
+};
 
-            if (!opts.responseType) {
-                try {
-                    response.body = JSON.parse(response.body);
-                } catch {}
-            }
+/**
+ * @param {string} url
+ * @param {object} opts
+ * @param {object} params
+ * @param {boolean} params.skipQueue
+ * @returns {Promise<object>}
+ */
+module.exports = (url, opts = {}, {skipQueue} = {}) => {
+    if (skipQueue) {
+        return request(url, opts);
+    }
 
-            debug(curl(url, opts, response));
-            return response;
-        } catch (err) {
-            await save(err);
-
-            debug(curl(url, opts, err));
-            throw err;
-        }
-    });
+    const queue = getQueue(new URL(url).host, opts.method);
+    return queue.add(() => request(url, opts));
 };
