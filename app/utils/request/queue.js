@@ -6,8 +6,6 @@ const debug = require('debug')('utils-mad:request:queue');
 const env = require('../../../env');
 const {default: PQueue} = require('p-queue');
 
-const influx = env.influx.url.replace('http://', '');
-
 const requestQueue = {
     '*': {
         '*': {concurrency: 5},
@@ -18,55 +16,70 @@ const requestQueue = {
         DELETE: {intervalCap: 1, interval: 1000},
     },
 
-    [influx]: {
+    [env.influx.ipPort]: {
         '*': {concurrency: 50},
     },
 };
 
 /**
  * Поставить логирование на простой очереди
- * @param {string} name
+ * @param {string} host
  * @param {string} method
  */
-const setLogOnActiveEvent = (name, method) => {
-    requestQueue[name][method].on('active', () => {
-        const {size, pending, _interval, _intervalCap, _concurrency} = requestQueue[name][method];
+const setLogOnActiveEvent = (host, method) => {
+    requestQueue[host][method].on('active', () => {
+        const {size, pending, _interval, _intervalCap, _concurrency} = requestQueue[host][method];
 
         const opts = _interval > 0
             ? `${_intervalCap} rp ${_interval} ms`
             : `${_concurrency} concurrent`;
 
-        debug(`[${method}: ${name}] ${opts} | queue: ${size} | running: ${pending}`);
+        debug(`[${method}: ${host}] ${opts} | queue: ${size} | running: ${pending}`);
     });
 };
 
 /**
- * Получить очередь по названию
- * @param {string} name
+ * Получить очередь по хосту и методу
+ * @param {string} host
  * @param {string} method
  * @returns {object}
  */
-const getQueue = (name, method = 'GET') => {
-    if (!requestQueue[name]) {
-        requestQueue[name] = {'*': new PQueue(requestQueue['*']['*'])};
-        setLogOnActiveEvent(name, '*');
-
-    } else if (requestQueue[name][method]) {
-        if (!requestQueue[name][method]._events) {
-            requestQueue[name][method] = new PQueue(requestQueue[name][method]);
-            setLogOnActiveEvent(name, method);
+const getQueue = (host, method = 'GET') => {
+    // если нет очереди по хосту
+    if (!requestQueue[host]) {
+        // инициализируем очередь дефолтными значениями
+        if (requestQueue['*'][method]) {
+            // если для метода есть дефолтные, то используем их
+            requestQueue[host] = {[method]: new PQueue(requestQueue['*'][method])};
+            setLogOnActiveEvent(host, method);
+        } else {
+            // иначе дефолтные для любых методов
+            requestQueue[host] = {'*': new PQueue(requestQueue['*']['*'])};
+            setLogOnActiveEvent(host, '*');
         }
 
-    } else if (!requestQueue[name]['*']) {
-        requestQueue[name]['*'] = new PQueue(requestQueue['*']['*']);
-        setLogOnActiveEvent(name, '*');
+    // если есть очередь по хосту и методу
+    } else if (requestQueue[host][method]) {
+        // если очередь не инициализирована
+        if (!requestQueue[host][method]._events) {
+            // инициализируем
+            requestQueue[host][method] = new PQueue(requestQueue[host][method]);
+            setLogOnActiveEvent(host, method);
+        }
 
-    } else if (requestQueue[name]['*'] && !requestQueue[name]['*']._events) {
-        requestQueue[name]['*'] = new PQueue(requestQueue[name]['*']);
-        setLogOnActiveEvent(name, '*');
+    // если нет очереди по хосту и любому методу
+    } else if (!requestQueue[host]['*']) {
+        // инициализируем очередь дефолтным значением для всех методов
+        requestQueue[host]['*'] = new PQueue(requestQueue['*']['*']);
+        setLogOnActiveEvent(host, '*');
+
+    // если есть очередь по хосту и любому методу, но она ещё не проинициализирована
+    } else if (!requestQueue[host]['*']._events) {
+        requestQueue[host]['*'] = new PQueue(requestQueue[host]['*']);
+        setLogOnActiveEvent(host, '*');
     }
 
-    return requestQueue[name][method] || requestQueue[name]['*'];
+    return requestQueue[host][method] || requestQueue[host]['*'];
 };
 
 module.exports = {getQueue};
