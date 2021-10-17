@@ -9,6 +9,7 @@ const influx = env.influx.url.replace('http://', '');
 const requestQueue = {
     'default': {concurrency: 5},
 
+    'rutor.info': {concurrency: 10},
     'api.themoviedb.org': {intervalCap: 10, interval: 1000},
     [influx]: {concurrency: 50},
 };
@@ -23,8 +24,8 @@ const setLogOnActiveEvent = name => {
 
         if (size > 0) {
             const opts = _concurrency === Number.POSITIVE_INFINITY
-                ? `${_intervalCap} req per ${_interval}`
-                : `${_concurrency} req concurrent`;
+                ? `${_intervalCap} rp ${_interval} ms`
+                : `${_concurrency} concurrent`;
 
             debug(`[${name}] ${opts} | wait for run: ${size} | running: ${pending}`);
         }
@@ -40,10 +41,8 @@ const getQueue = name => {
     if (!requestQueue[name]) {
         requestQueue[name] = new PQueue(requestQueue.default);
         setLogOnActiveEvent(name);
-    }
-
     // eslint-disable-next-line no-underscore-dangle
-    if (!requestQueue[name]._events) {
+    } else if (!requestQueue[name]._events) {
         requestQueue[name] = new PQueue(requestQueue[name]);
         setLogOnActiveEvent(name);
     }
