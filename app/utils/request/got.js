@@ -12,51 +12,39 @@ const {getQueue} = require('./queue');
  * @param {object} opts
  * @returns {Promise<object>}
  */
-const request = async (url, opts = {}) => {
-    opts = {...opts};
+module.exports = (url, opts = {}) => {
+    const queue = getQueue(new URL(url).host);
 
-    if (!opts.timeout) {
-        opts.timeout = 15_000;
-    }
+    return queue.add(async () => {
+        opts = {...opts};
 
-    if (!opts.headers) {
-        opts.headers = {'user-agent': ua.tools.curl};
-    } else if (!opts.headers['user-agent']) {
-        opts.headers['user-agent'] = ua.tools.curl;
-    }
-
-    try {
-        const response = await got(url, opts);
-        await save(response);
-
-        if (!opts.responseType) {
-            try {
-                response.body = JSON.parse(response.body);
-            } catch {}
+        if (!opts.timeout) {
+            opts.timeout = 15_000;
         }
 
-        debug(curl(url, opts, response));
-        return response;
-    } catch (err) {
-        await save(err);
+        if (!opts.headers) {
+            opts.headers = {'user-agent': ua.tools.curl};
+        } else if (!opts.headers['user-agent']) {
+            opts.headers['user-agent'] = ua.tools.curl;
+        }
 
-        debug(curl(url, opts, err));
-        throw err;
-    }
-};
+        try {
+            const response = await got(url, opts);
+            await save(response);
 
-/**
- * @param {string} url
- * @param {object} opts
- * @param {object} params
- * @param {boolean} params.skipQueue
- * @returns {Promise<object>}
- */
-module.exports = (url, opts, {skipQueue} = {}) => {
-    if (skipQueue) {
-        return request(url, opts);
-    }
+            if (!opts.responseType) {
+                try {
+                    response.body = JSON.parse(response.body);
+                } catch {}
+            }
 
-    const queue = getQueue(new URL(url).host);
-    return queue.add(() => request(url, opts));
+            debug(curl(url, opts, response));
+            return response;
+        } catch (err) {
+            await save(err);
+
+            debug(curl(url, opts, err));
+            throw err;
+        }
+    });
 };
