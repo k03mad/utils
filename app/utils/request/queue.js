@@ -19,16 +19,14 @@ const requestQueue = {
  * @param {string} name
  */
 const setLogOnActiveEvent = name => {
-    requestQueue[name].on('completed', () => {
+    requestQueue[name].on('active', () => {
         const {size, pending, _interval, _intervalCap, _concurrency} = requestQueue[name];
 
-        if (size > 0) {
-            const opts = _concurrency === Number.POSITIVE_INFINITY
-                ? `${_intervalCap} rp ${_interval} ms`
-                : `${_concurrency} concurrent`;
+        const opts = _concurrency === Number.POSITIVE_INFINITY
+            ? `${_intervalCap} rp ${_interval} ms`
+            : `${_concurrency} concurrent`;
 
-            debug(`[${name}] ${opts} | wait for run: ${size} | running: ${pending}`);
-        }
+        debug(`[${name}] ${opts} | wait for run: ${size} | running: ${pending}`);
     });
 };
 
