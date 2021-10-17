@@ -7,10 +7,8 @@ const {default: PQueue} = require('p-queue');
 const influx = env.influx.url.replace('http://', '');
 
 const requestQueue = {
-    'default': {concurrency: 5},
+    default: {concurrency: 5},
 
-    'rutor.info': {concurrency: 10},
-    'api.themoviedb.org': {intervalCap: 10, interval: 1000},
     [influx]: {concurrency: 50},
 };
 
