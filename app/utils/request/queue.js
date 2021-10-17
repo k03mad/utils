@@ -7,8 +7,9 @@ const {default: PQueue} = require('p-queue');
 const influx = env.influx.url.replace('http://', '');
 
 const requestQueue = {
-    default: {concurrency: 5},
+    'default': {concurrency: 5},
 
+    'api.nextdns.io': {intervalCap: 1, interval: 1000},
     [influx]: {concurrency: 50},
 };
 
