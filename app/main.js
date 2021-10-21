@@ -6,6 +6,9 @@ module.exports = {
         get: require('./api/adg/get'),
         post: require('./api/adg/post'),
     },
+    cloud: {
+        notify: require('./api/cloud/notify'),
+    },
     influx: {
         append: require('./api/influx/append'),
         query: require('./api/influx/query'),

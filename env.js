@@ -5,6 +5,9 @@ module.exports = {
         auth: process.env.ADG_AUTH,
         url: process.env.ADG_URL,
     },
+    cloud: {
+        tg: process.env.TELEGRAM_CLOUD_TOKEN,
+    },
     influx: {
         url: process.env.INFLUX_URL,
         db: process.env.INFLUX_DB,
