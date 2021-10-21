@@ -8,7 +8,7 @@ const {default: PQueue} = require('p-queue');
 
 const requestQueue = {
     '*': {
-        '*': {concurrency: 5},
+        '*': {concurrency: 3},
     },
 
     'api.themoviedb.org': {
