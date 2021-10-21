@@ -11,10 +11,6 @@ const requestQueue = {
         '*': {concurrency: 3},
     },
 
-    'api.themoviedb.org': {
-        '*': {concurrency: 5},
-    },
-
     'api.nextdns.io': {
         PATCH: {intervalCap: 1, interval: 1000},
         DELETE: {intervalCap: 1, interval: 1000},
