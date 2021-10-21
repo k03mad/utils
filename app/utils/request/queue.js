@@ -12,7 +12,7 @@ const requestQueue = {
     },
 
     'api.themoviedb.org': {
-        '*': {concurrency: 10},
+        '*': {concurrency: 5},
     },
 
     'api.nextdns.io': {
