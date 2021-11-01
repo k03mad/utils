@@ -15,7 +15,7 @@
     "chalk": "4.1.2",
     "cheerio": "1.0.0-rc.10",
     "debug": "4.3.2",
-    "filenamify": "4.3.0",
+    "filenamify": "5.0.2",
     "got": "11.8.2",
     "hasha": "5.2.2",
     "moment": "2.29.1",
