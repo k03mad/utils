@@ -14,7 +14,7 @@ module.exports = async ({
     cred = myshows,
     gotOpts = {},
 
-}) => {
+} = {}) => {
     const {login, password, client, secret} = cred;
 
     const {body} = await gotCache('https://myshows.me/oauth/token', {

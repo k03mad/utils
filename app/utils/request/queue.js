@@ -6,18 +6,26 @@ const debug = require('debug')('utils-mad:request:queue');
 const env = require('../../../env');
 const {default: PQueue} = require('p-queue');
 
+const rps = num => ({intervalCap: num, interval: 1000});
+const concurrency = num => ({concurrency: num});
+
 const requestQueue = {
     '*': {
-        '*': {concurrency: 3},
+        '*': concurrency(3),
+    },
+
+    'api.themoviedb.org': {
+        '*': concurrency(5),
     },
 
     'api.nextdns.io': {
-        PATCH: {intervalCap: 1, interval: 1000},
-        DELETE: {intervalCap: 1, interval: 1000},
+        '*': concurrency(10),
+        'PATCH': rps(1),
+        'DELETE': rps(1),
     },
 
     [env.influx.ipPort]: {
-        '*': {concurrency: 50},
+        '*': concurrency(50),
     },
 };
 
