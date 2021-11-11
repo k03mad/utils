@@ -28,6 +28,8 @@ module.exports = async response => {
                     method: response?.req?.method,
                     domain: parsed.hostname,
                     timing: response?.timings?.phases?.total,
+                    // eslint-disable-next-line no-underscore-dangle
+                    port: response?.socket?._peername?.port,
                     date,
                 };
 
