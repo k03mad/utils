@@ -9,7 +9,7 @@ const gotCache = require('./cache');
  * @param {string} opts.expire
  * @returns {Promise<object>}
  */
-module.exports = async ({resolver = 'https://cloudflare-dns.com/dns-query', domain, expire = '1m'}) => {
+module.exports = async ({resolver = 'https://dns.google/resolve', domain, expire = '7d'}) => {
     const {body} = await gotCache(resolver, {
         headers: {accept: 'application/dns-json'},
         searchParams: {name: domain},
