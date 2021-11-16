@@ -10,7 +10,7 @@ const gotCache = require('../../utils/request/cache');
 module.exports = async ip => {
     const {body} = await gotCache(
         'http://api.geoiplookup.net/', {searchParams: {query: ip}},
-        {expire: '31d'},
+        {expire: '30d'},
     );
 
     const converted = convert.xml2js(body, {

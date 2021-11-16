@@ -10,7 +10,7 @@ const {ipinfo} = require('../../../env');
 module.exports = async ip => {
     const url = `https://ipinfo.io/${ip}`;
     const tokenParams = {searchParams: {token: ipinfo.token}};
-    const cacheParams = {expire: '31d'};
+    const cacheParams = {expire: '30d'};
 
     let body;
 
