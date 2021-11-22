@@ -16,41 +16,40 @@ module.exports = async ({
 
 } = {}) => {
     const shows = await get({method: 'profile.Shows', gotOpts});
+    const watch = [];
 
-    let watch = shows.filter(
-        elem => elem.watchStatus === 'watching'
-        && elem.totalEpisodes - elem.watchedEpisodes > 0,
-    );
-
-    if (onlyAired) {
-        let i = 0;
-
-        for (const {show} of watch) {
-            const [watchedEpisodes, allEpisodes] = await Promise.all([
-                get({method: 'profile.Episodes', params: {showId: show.id}, gotOpts}),
-                get({method: 'shows.GetById', params: {showId: show.id, withEpisodes: true}, gotOpts}),
-            ]);
-
-            const watchedIds = new Set(watchedEpisodes.map(elem => elem.id));
-            const filterEpisodes = allEpisodes.episodes.filter(
-                elem => !watchedIds.has(elem.id)
-                && elem.airDate
-                && diff({date: elem.airDate}) >= 0,
-            );
-
-            watch[i].show.episodesToWatch = filterEpisodes;
-            watch[i].show.kinopoiskId = allEpisodes.kinopoiskId;
-            watch[i].show.imdbId = allEpisodes.imdbId;
-
-            i++;
+    shows.forEach(elem => {
+        if (
+            elem.watchStatus === 'watching'
+            && elem.totalEpisodes - elem.watchedEpisodes > 0
+        ) {
+            elem.show.title = elem.show.title.trim();
+            elem.show.titleOriginal = elem.show.titleOriginal.trim();
+            watch.push(elem);
         }
+    });
 
-        watch = watch.filter(elem => elem.show.episodesToWatch.length > 0);
+    if (!onlyAired) {
+        return watch;
     }
 
-    return watch.map(elem => {
-        elem.show.title = elem.show.title.trim();
-        elem.show.titleOriginal = elem.show.titleOriginal.trim();
-        return elem;
-    });
+    await Promise.all([...watch.entries()].map(async ([i, {show}]) => {
+        const [watchedEpisodes, allEpisodes] = await Promise.all([
+            get({method: 'profile.Episodes', params: {showId: show.id}, gotOpts}),
+            get({method: 'shows.GetById', params: {showId: show.id, withEpisodes: true}, gotOpts}),
+        ]);
+
+        const watchedIds = new Set(watchedEpisodes.map(elem => elem.id));
+        const filterEpisodes = allEpisodes.episodes.filter(
+            elem => !watchedIds.has(elem.id)
+                && elem.airDate
+                && diff({date: elem.airDate}) >= 0,
+        );
+
+        watch[i].show.episodesToWatch = filterEpisodes;
+        watch[i].show.kinopoiskId = allEpisodes.kinopoiskId;
+        watch[i].show.imdbId = allEpisodes.imdbId;
+    }));
+
+    return watch.filter(elem => elem.show.episodesToWatch.length > 0);
 };
