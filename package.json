@@ -16,7 +16,7 @@
     "cheerio": "1.0.0-rc.10",
     "debug": "4.3.2",
     "filenamify": "4.3.0",
-    "got": "11.8.2",
+    "got": "11.8.3",
     "hasha": "5.2.2",
     "moment": "2.29.1",
     "ms": "2.1.3",
@@ -30,13 +30,13 @@
     "xml-js": "1.6.11"
   },
   "devDependencies": {
-    "@k03mad/eslint-config": "8.2.2",
+    "@k03mad/eslint-config": "8.2.3",
     "eslint": "7.32.0",
     "eslint-plugin-jsdoc": "37.0.3",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "5.1.1",
     "eslint-plugin-sort-requires": "2.1.0",
-    "eslint-plugin-unicorn": "38.0.1",
+    "eslint-plugin-unicorn": "39.0.0",
     "husky": "7.0.4"
   },
   "scripts": {

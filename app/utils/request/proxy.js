@@ -33,7 +33,6 @@ module.exports = async ({
         'https://www.mostafahamed.com/logs2/',
     ];
 
-    // eslint-disable-next-line consistent-return
     const result = await Promise.race(phproxyList.map(async proxy => {
         const proxyFull = proxy + path;
         const proxyTest = proxyFull + testUrl;
