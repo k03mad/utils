@@ -72,19 +72,23 @@ module.exports = async opts => {
         },
     };
 
+    let body;
+
     if (scenario) {
-        await got(`https://iot.quasar.yandex.ru/m/v3/user/scenarios/${scenario.id}`, {
+        ({body} = await got(`https://iot.quasar.yandex.ru/m/v3/user/scenarios/${scenario.id}`, {
             method: 'PUT',
             ...requestOpts,
-        });
+        }));
     } else {
-        await got('https://iot.quasar.yandex.ru/m/v3/user/scenarios/', {
+        ({body} = await got('https://iot.quasar.yandex.ru/m/v3/user/scenarios/', {
             method: 'POST',
             ...requestOpts,
-        });
+        }));
 
         scenario = await getScenario(defOpts, '0m');
     }
+
+    console.log(body);
 
     await got(`https://iot.quasar.yandex.ru/m/user/scenarios/${scenario.id}/actions`, {
         method: 'POST',

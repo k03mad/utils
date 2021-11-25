@@ -11,7 +11,7 @@ const {yandex} = require('../../../env');
  * @returns {Array}
  */
 module.exports = async ({login = yandex.login, password = yandex.password} = {}) => {
-    const {body, headers} = await gotCache('https://passport.yandex.ru/auth/', {
+    const {headers} = await gotCache('https://passport.yandex.ru/auth/', {
         method: 'POST',
         form: {
             login,
@@ -24,7 +24,7 @@ module.exports = async ({login = yandex.login, password = yandex.password} = {})
     });
 
     if (!headers['set-cookie'].some(elem => elem.includes('Session_id'))) {
-        throw new Error(`Missed session cookies\n\n${body}`);
+        throw new Error('No session cookies found');
     }
 
     return headers['set-cookie']
