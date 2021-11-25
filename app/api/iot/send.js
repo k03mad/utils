@@ -1,11 +1,32 @@
 'use strict';
 
 const auth = require('../ya/auth');
+const delay = require('../../utils/promise/delay');
 const getDevice = require('./getDevice');
 const getScenario = require('./getScenario');
 const getToken = require('./getToken');
 const got = require('../../utils/request/got');
 const {android} = require('../../const/ua');
+
+const setScenario = async (scenario, requestOpts, defOpts) => {
+    if (scenario) {
+        const {body} = await got(`https://iot.quasar.yandex.ru/m/v3/user/scenarios/${scenario.id}`, {
+            method: 'PUT',
+            ...requestOpts,
+        });
+
+        return body;
+    }
+
+    const {body} = await got('https://iot.quasar.yandex.ru/m/v3/user/scenarios/', {
+        method: 'POST',
+        ...requestOpts,
+    });
+
+    const newScenario = await getScenario(defOpts, '0m');
+
+    return {body, newScenario};
+};
 
 /**
  * @param {object} opts
@@ -25,7 +46,7 @@ module.exports = async opts => {
         ...opts,
     };
 
-    let [cookie, token, scenario, device] = await Promise.all([
+    const [cookie, token, scenario, device] = await Promise.all([
         auth(defOpts),
         getToken(defOpts),
         getScenario(defOpts),
@@ -72,27 +93,24 @@ module.exports = async opts => {
         },
     };
 
-    let body;
+    let body, newScenario;
 
-    if (scenario) {
-        ({body} = await got(`https://iot.quasar.yandex.ru/m/v3/user/scenarios/${scenario.id}`, {
-            method: 'PUT',
-            ...requestOpts,
-        }));
-    } else {
-        ({body} = await got('https://iot.quasar.yandex.ru/m/v3/user/scenarios/', {
-            method: 'POST',
-            ...requestOpts,
-        }));
-
-        scenario = await getScenario(defOpts, '0m');
+    try {
+        ({body, newScenario} = await setScenario(scenario, requestOpts, defOpts));
+    } catch (err) {
+        if (err.response?.statusCode === 403) {
+            await delay(3000);
+            ({body, newScenario} = await setScenario(scenario, requestOpts, defOpts));
+        } else {
+            throw new Error(err.message);
+        }
     }
 
     if (body?.message && body?.status === 'error') {
         throw new Error(body.message);
     }
 
-    await got(`https://iot.quasar.yandex.ru/m/user/scenarios/${scenario.id}/actions`, {
+    await got(`https://iot.quasar.yandex.ru/m/user/scenarios/${(newScenario || scenario).id}/actions`, {
         method: 'POST',
         headers: {
             'x-csrf-token': token,
