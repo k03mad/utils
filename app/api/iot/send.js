@@ -18,11 +18,18 @@ const {android} = require('../../const/ua');
  * @returns {Array}
  */
 module.exports = async opts => {
+    const defOpts = {
+        deviceName: 'Яндекс Станция',
+        scenarioName: 'Голос',
+        instance: 'phrase_action',
+        ...opts,
+    };
+
     let [cookie, token, scenario, device] = await Promise.all([
-        auth(opts),
-        getToken(opts),
-        getScenario(opts),
-        getDevice(opts),
+        auth(defOpts),
+        getToken(defOpts),
+        getScenario(defOpts),
+        getDevice(defOpts),
     ]);
 
     const requestOpts = {
@@ -32,7 +39,7 @@ module.exports = async opts => {
             cookie,
         },
         json: {
-            name: opts.scenarioName,
+            name: defOpts.scenarioName,
             icon: 'ball',
             trigger_type: 'scenario.trigger.voice',
             devices: [
@@ -42,8 +49,8 @@ module.exports = async opts => {
                         {
                             type: 'devices.capabilities.quasar.server_action',
                             state: {
-                                instance: opts.instance,
-                                value: opts.value,
+                                instance: defOpts.instance,
+                                value: defOpts.value,
                             },
                         },
                     ],
@@ -64,7 +71,7 @@ module.exports = async opts => {
             ...requestOpts,
         });
 
-        scenario = await getScenario(opts, '0m');
+        scenario = await getScenario(defOpts, '0m');
     }
 
     await got(`https://iot.quasar.yandex.ru/m/user/scenarios/${scenario.id}/actions`, {
