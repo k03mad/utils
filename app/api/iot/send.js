@@ -88,7 +88,9 @@ module.exports = async opts => {
         scenario = await getScenario(defOpts, '0m');
     }
 
-    console.log(body);
+    if (body?.message && body?.status === 'error') {
+        throw new Error(body.message);
+    }
 
     await got(`https://iot.quasar.yandex.ru/m/user/scenarios/${scenario.id}/actions`, {
         method: 'POST',
