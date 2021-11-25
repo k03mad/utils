@@ -23,7 +23,7 @@ module.exports = async ({login = yandex.login, password = yandex.password} = {})
         followRedirect: false,
     });
 
-    if (headers['set-cookie'].some(elem => elem.includes('Session_id'))) {
+    if (!headers['set-cookie'].some(elem => elem.includes('Session_id'))) {
         throw new Error(`Missed session cookies\n\n${body}`);
     }
 
