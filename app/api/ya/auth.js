@@ -1,7 +1,7 @@
 'use strict';
 
 const gotCache = require('../../utils/request/cache');
-const {android} = require('../../const/ua');
+const {mac} = require('../../const/ua');
 const {yandex} = require('../../../env');
 
 /**
@@ -11,17 +11,21 @@ const {yandex} = require('../../../env');
  * @returns {Array}
  */
 module.exports = async ({login = yandex.login, password = yandex.password} = {}) => {
-    const {headers} = await gotCache('https://passport.yandex.ru/auth/', {
+    const {body, headers} = await gotCache('https://passport.yandex.ru/auth/', {
         method: 'POST',
         form: {
             login,
             passwd: password,
         },
         headers: {
-            'user-agent': android.pp,
+            'user-agent': mac.ya,
         },
         followRedirect: false,
     });
+
+    if (headers['set-cookie'].some(elem => elem.includes('Session_id'))) {
+        throw new Error(`Missed session cookies\n\n${body}`);
+    }
 
     return headers['set-cookie']
         .map(elem => elem.split('; ')[0])

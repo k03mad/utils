@@ -41,32 +41,44 @@ module.exports = async opts => {
         json: {
             name: defOpts.scenarioName,
             icon: 'ball',
-            trigger_type: 'scenario.trigger.voice',
-            devices: [
+            triggers: [
                 {
-                    id: device.id,
-                    capabilities: [
-                        {
-                            type: 'devices.capabilities.quasar.server_action',
-                            state: {
-                                instance: defOpts.instance,
-                                value: defOpts.value,
-                            },
-                        },
-                    ],
+                    type: 'scenario.trigger.voice',
+                    value: defOpts.scenarioName,
                 },
             ],
-            requested_speaker_capabilities: [],
+            steps: [
+                {
+                    type: 'scenarios.steps.actions',
+                    parameters: {
+                        requested_speaker_capabilities: [],
+                        launch_devices: [
+                            {
+                                id: device.id,
+                                capabilities: [
+                                    {
+                                        type: 'devices.capabilities.quasar.server_action',
+                                        state: {
+                                            instance: defOpts.instance,
+                                            value: defOpts.value,
+                                        },
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            ],
         },
     };
 
     if (scenario) {
-        await got(`https://iot.quasar.yandex.ru/m/user/scenarios/${scenario.id}`, {
+        await got(`https://iot.quasar.yandex.ru/m/v3/user/scenarios/${scenario.id}`, {
             method: 'PUT',
             ...requestOpts,
         });
     } else {
-        await got('https://iot.quasar.yandex.ru/m/user/scenarios/', {
+        await got('https://iot.quasar.yandex.ru/m/v3/user/scenarios/', {
             method: 'POST',
             ...requestOpts,
         });
