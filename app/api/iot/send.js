@@ -115,14 +115,14 @@ const send = async opts => {
  */
 const sendWithRetry = async opts => {
     try {
-        await send(opts);
+        return await send(opts);
     } catch (err) {
         if (err.response?.statusCode === 403) {
             await delay(3000);
-            await send(opts);
-        } else {
-            throw err;
+            return send(opts);
         }
+
+        throw err;
     }
 };
 
