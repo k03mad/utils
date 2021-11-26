@@ -99,6 +99,8 @@ const send = async opts => {
             cookie,
         },
     });
+
+    return defOpts;
 };
 
 /**
@@ -109,7 +111,7 @@ const send = async opts => {
  * @param {string} opts.scenarioName
  * @param {'phrase_action'|'text_action'} opts.instance
  * @param {string} opts.value
- * @returns {Array}
+ * @returns {object}
  */
 const sendWithRetry = async opts => {
     try {
