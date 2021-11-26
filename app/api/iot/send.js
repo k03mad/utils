@@ -23,6 +23,14 @@ const send = async opts => {
         getDevice(defOpts),
     ]);
 
+    if (defOpts.value && defOpts.instance === 'phrase_action') {
+        defOpts.value = defOpts.value
+            // доступные символы для голоса
+            .replace(/[^\d ,.:=?a-zа-яё-]/gi, ' ')
+            .replace(/ +/g, ' ')
+            .trim();
+    }
+
     const requestOpts = {
         headers: {
             'x-csrf-token': token,
