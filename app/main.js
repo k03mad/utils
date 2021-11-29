@@ -2,10 +2,6 @@
 
 module.exports = {
     // API
-    adg: {
-        get: require('./api/adg/get'),
-        post: require('./api/adg/post'),
-    },
     cloud: {
         notify: require('./api/cloud/notify'),
     },
@@ -41,10 +37,6 @@ module.exports = {
         auth: require('./api/next/auth'),
         query: require('./api/next/query'),
         list: require('./api/next/list'),
-    },
-    orna: {
-        get: require('./api/orna/get'),
-        web: require('./api/orna/web'),
     },
     pinger: {
         check: require('./api/pinger/check'),
@@ -102,9 +94,6 @@ module.exports = {
         count: require('./utils/object/count'),
         path: require('./utils/object/path'),
         reverse: require('./utils/object/reverse'),
-    },
-    parse: {
-        text: require('./utils/parse/text'),
     },
     print: {
         ex: require('./utils/print/ex'),

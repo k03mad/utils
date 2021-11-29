@@ -1,10 +1,6 @@
 'use strict';
 
 module.exports = {
-    adg: {
-        auth: process.env.ADG_AUTH,
-        url: process.env.ADG_URL,
-    },
     cloud: {
         tg: process.env.TELEGRAM_CLOUD_TOKEN,
     },
