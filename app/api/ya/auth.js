@@ -11,7 +11,7 @@ const {yandex} = require('../../../env');
  * @returns {Array}
  */
 module.exports = async ({login = yandex.login, password = yandex.password} = {}) => {
-    const {headers} = await gotCache('https://passport.yandex.ru/auth/', {
+    const {statusCode, headers} = await gotCache('https://passport.yandex.ru/auth/', {
         method: 'POST',
         form: {
             login,
@@ -21,7 +21,11 @@ module.exports = async ({login = yandex.login, password = yandex.password} = {})
             'user-agent': mac.ya,
         },
         followRedirect: false,
-    });
+    }, {expire: '1d'});
+
+    if (statusCode !== 302) {
+        throw new Error('No auth redirect found');
+    }
 
     if (!headers['set-cookie'].some(elem => elem.includes('Session_id'))) {
         throw new Error('No session cookies found');

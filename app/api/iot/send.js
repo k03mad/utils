@@ -16,8 +16,9 @@ const send = async opts => {
         ...opts,
     };
 
-    let [cookie, token, scenario, device] = await Promise.all([
-        auth(defOpts),
+    const cookie = await auth(defOpts);
+
+    let [token, scenario, device] = await Promise.all([
         getToken(defOpts),
         getScenario(defOpts),
         getDevice(defOpts),
@@ -119,7 +120,12 @@ const sendWithRetry = async opts => {
     } catch (err) {
         if (err.response?.statusCode === 403) {
             await delay(3000);
-            return send(opts);
+
+            try {
+                return await send(opts);
+            } catch {
+                throw err;
+            }
         }
 
         throw err;

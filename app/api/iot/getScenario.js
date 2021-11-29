@@ -12,7 +12,7 @@ const {android} = require('../../const/ua');
  * @param {string} expire
  * @returns {Array}
  */
-module.exports = async (opts, expire) => {
+module.exports = async (opts, expire = '1d') => {
     const cookie = await auth(opts);
     const {body} = await gotCache('https://iot.quasar.yandex.ru/m/user/scenarios', {
         headers: {

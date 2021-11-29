@@ -18,7 +18,7 @@ module.exports = async opts => {
             cookie,
         },
         responseType: 'text',
-    });
+    }, {expire: '1d'});
 
     const [, token] = body.match(/csrfToken2":"(.+?)"/);
     return token;

@@ -19,7 +19,7 @@ module.exports = async opts => {
             cookie,
         },
         _cache: opts.deviceName,
-    });
+    }, {expire: '1d'});
 
     return body.rooms
         .flatMap(elem => elem.devices)
