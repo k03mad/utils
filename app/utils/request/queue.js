@@ -4,7 +4,7 @@
 
 const debug = require('debug')('utils-mad:request:queue');
 const env = require('../../../env');
-const PQueue = require('p-queue');
+const PQueue = require('p-queue').default;
 
 const rps = num => ({intervalCap: num, interval: 1000});
 const concurrency = num => ({concurrency: num});
