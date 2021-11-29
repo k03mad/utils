@@ -1,7 +1,7 @@
 'use strict';
 
 const now = require('../date/now');
-const {green, yellow} = require('chalk');
+const {green, yellow} = require('colorette');
 
 /**
  * @param {string} msg

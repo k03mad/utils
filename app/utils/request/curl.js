@@ -1,7 +1,7 @@
 'use strict';
 
 const prettyBytes = require('pretty-bytes');
-const {dim, white, green, blue, magenta, yellow, bgWhite, black, red} = require('chalk');
+const {dim, white, green, blue, magenta, yellow, bgWhite, black, red} = require('colorette');
 
 /**
  * @param {string} url

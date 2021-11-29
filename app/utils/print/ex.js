@@ -1,7 +1,7 @@
 'use strict';
 
 const now = require('../date/now');
-const {green, yellow, red, blue} = require('chalk');
+const {green, yellow, red, blue} = require('colorette');
 
 let errors = 0;
 

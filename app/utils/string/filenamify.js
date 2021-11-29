@@ -1,9 +1,9 @@
 'use strict';
 
-const filenamify = require('filenamify');
+const sanitize = require('sanitize-filename');
 
 /**
  * @param {string} str
  * @returns {string}
  */
-module.exports = str => filenamify(str, {replacement: '_'}).replace(/_+/g, '_');
+module.exports = str => sanitize(str, {replacement: '_'}).replace(/_+/g, '_');
