@@ -4,7 +4,7 @@
 
 const debug = require('debug')('utils-mad:request:queue');
 const env = require('../../../env');
-const PQueue = require('fix-esm').require('p-queue').default;
+const PQueue = require('p-queue');
 
 const rps = num => ({intervalCap: num, interval: 1000});
 const concurrency = num => ({concurrency: num});

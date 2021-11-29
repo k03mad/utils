@@ -1,7 +1,7 @@
 'use strict';
 
 const now = require('../date/now');
-const {green, yellow, red, blue} = require('fix-esm').require('chalk').default;
+const {green, yellow, red, blue} = require('chalk');
 
 let errors = 0;
 
