@@ -1,6 +1,6 @@
 'use strict';
 
-const filenamify = require('filenamify');
+const filenamify = require('fix-esm').require('filenamify').default;
 
 /**
  * @param {string} str
